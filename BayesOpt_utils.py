@@ -4,14 +4,22 @@
 Created on Mon Jul  8 15:42:47 2019
 
 @author: athar
+
+Refs : 
+#https://github.com/SheffieldML/GPyOpt/blob/master/GPyOpt/acquisitions/EI.py
+#https://github.com/SheffieldML/GPyOpt/blob/master/GPyOpt/models/gpmodel.py
 """
 import numpy as np
 import pandas as pd
 
 from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import DotProduct, WhiteKernel
+#from sklearn.gaussian_process.kernels import DotProduct, WhiteKernel
 
 def Data_generator():
+    """
+    num_cat 
+    
+    """
     pass
 
 
@@ -45,54 +53,21 @@ def Surrogate_model(model_type = "gpr", params ,data, cross_validate= False, gri
     return fitted_model 
 
 
-def aqu (fun_type, glb_min, fitted_model, grid ):
     
-    
-    
-    return aqu_val_min, nxt_smpl
 
-
-#https://github.com/SheffieldML/GPyOpt/blob/master/GPyOpt/acquisitions/EI.py
-#https://github.com/SheffieldML/GPyOpt/blob/master/GPyOpt/models/gpmodel.py
-    
-def _predict(self, X, full_cov, include_likelihood):
-        if X.ndim == 1:
-            X = X[None,:]
-        m, v = self.model.predict(X, full_cov=full_cov, include_likelihood=include_likelihood)
-        v = np.clip(v, 1e-10, np.inf)
-        return m, v
-
-def predict(self, X, with_noise=True):
+def _compute_acq(fitted_model,grid, fmin, epsilon):
         """
-        Predictions with the model. Returns posterior means and standard deviations at X. Note that this is different in GPy where the variances are given.
-        Parameters:
-            X (np.ndarray) - points to run the prediction for.
-            with_noise (bool) - whether to add noise to the prediction. Default is True.
-        """
-        m, v = self._predict(X, False, with_noise)
-        # We can take the square root because v is just a diagonal matrix of variances
-        return m, np.sqrt(v)
-
-def _compute_acq(fitted_model,grid):
-        """
-        Computes the Expected Improvement per unit of cost
+        Computes the Expected Improvement per unit of cost.
+        fmin : is the global minimum.
+        grid : The grid that we want to fit the function and do the optimization on.
+        epsilon : positive value to make the acquisition more explorative. Check the Simon paper. 
+        
         """
         m, s = fitted_model.predict(grid)
-        fmin = fitted_model.get_fmin()
-        phi, Phi, u = get_quantiles(self.jitter, fmin, m, s)
+        phi, Phi, u = get_quantiles(epsilon, fmin, m, s)
         f_acqu = s * (u * Phi + phi)
         return f_acqu
 
-def _compute_acq_withGradients(self, x):
-        """
-        Computes the Expected Improvement and its derivative (has a very easy derivative!)
-        """
-        fmin = self.model.get_fmin()
-        m, s, dmdx, dsdx = self.model.predict_withGradients(x)
-        phi, Phi, u = get_quantiles(self.jitter, fmin, m, s)
-        f_acqu = s * (u * Phi + phi)
-        df_acqu = dsdx * phi - Phi * dmdx
-        return f_acqu, df_acqu
 
 def get_quantiles(acquisition_par, fmin, m, s):
     '''
@@ -111,6 +86,7 @@ def get_quantiles(acquisition_par, fmin, m, s):
     Phi = 0.5 * erfc(-u / np.sqrt(2))
     return (phi, Phi, u)
 
+
 def pick_next_sample(min_aqu_vec, nxt_smpl_vec):
     
     min_pos = min_aqu_vec.argmin()
@@ -118,3 +94,30 @@ def pick_next_sample(min_aqu_vec, nxt_smpl_vec):
     next_sample_total = nxt_smpl_vec[min_pos]
     
     return next_sample_total, aqu_min_total
+
+def get_fmin(fitted_model, X) :
+   
+        """
+        Returns the location where the posterior mean is takes its minimal value.
+        """
+    min_pos = min_aqu_vec.argmin()
+    aqu_min_total = min_aqu_vec.min()
+    next_sample_total = nxt_smpl_vec[min_pos]
+    
+    return fitted_model.predict(fitted_model.X)[0].min()
+
+
+
+"""
+def _compute_acq_withGradients(self, x):
+        
+       # Computes the Expected Improvement and its derivative (has a very easy derivative!)
+        
+        fmin = self.model.get_fmin()
+        m, s, dmdx, dsdx = self.model.predict_withGradients(x)
+        phi, Phi, u = get_quantiles(self.jitter, fmin, m, s)
+        f_acqu = s * (u * Phi + phi)
+        df_acqu = dsdx * phi - Phi * dmdx
+        return f_acqu, df_acqu
+        
+"""
