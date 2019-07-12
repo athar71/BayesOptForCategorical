@@ -15,6 +15,9 @@ import pandas as pd
 from sklearn.gaussian_process import GaussianProcessRegressor
 #from sklearn.gaussian_process.kernels import DotProduct, WhiteKernel
 
+def Checking_data_gen(num_cats, ):
+    
+    
 def Data_generator():
     """
     num_cat 
@@ -25,9 +28,14 @@ def Data_generator():
 
 def Data_organizer(Data):
     
-    
-    #return x_cnts, x_cat, y, num_cat, num_cnts_var
-    return Data_organazied, num_cat, num_cnts_var
+    """
+    This function takes The whole data, 
+    1- mixes all categorical variables to one categorical varaiable with all
+    the possible combinations of the initial categorical variables.
+    2- for each levels of the new categorical variable it finds the data points
+    in that category and report a (x,y) continuous data array.
+    """
+    pass
 
 
 
