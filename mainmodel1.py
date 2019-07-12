@@ -19,7 +19,8 @@ defining inputs:
     Acquisition function(type)
     
 """
-
+input_dim = X.shape[1]
+    
 
 """
 Merging categorical inputs

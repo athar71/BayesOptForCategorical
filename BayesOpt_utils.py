@@ -31,7 +31,8 @@ def Data_organizer(Data):
 
 
 
-def Surrogate_model(model_type = "gpr", params ,data, cross_validate= False, grid):
+def GPR_model(kernelf=None, noise_var=1e-10, exact_feval=False, optimizerf='fmin_l_bfgs_b',\
+              optimize_restarts=5, X, Y, cross_validate= False, grid):
     
     """
     model_type : GPR is the default, rfr (random forest regression or other methods could be added)
@@ -40,30 +41,36 @@ def Surrogate_model(model_type = "gpr", params ,data, cross_validate= False, gri
     cross_validate : If we want to do cross validation for the training.
     grid : The unknown points for the prediction
     
+    normalize_y :This parameter should be set to True if the target values’ mean 
+    is expected to differ considerable from zero. When enabled, the normalization effectively modifies 
+    the GP’s prior based on the data,
+    which contradicts the likelihood principle; normalization is thus disabled per default.
+    
     fitted_model : The output
     """
+            
+            
+    gpr = GaussianProcessRegressor(kernel= kernelf, alpha=noise_var, optimizer=optimizerf,\
+                                   n_restarts_optimizer= optimize_restarts, normalize_y=False).fit(X, Y)
+    score = gpr.score(X, Y)
+    m,s = gpr.predict(grid, return_std=True, return_cov=False)
     
-    if model_type == "gpr":
-       
-        gpr = GaussianProcessRegressor(kernel=params.kernel ,random_state=0).fit(data.x, data.y)
-        fitted_model.score = gpr.score(data.x, data.y)
-        fitted_model.predict =  predict(grid, return_std=False, return_cov=False)
-        fitted_model. params = gpr.get_params
+    
    
-    return fitted_model 
-
+    return score, m, s
 
     
 
-def _compute_acq(fitted_model,grid, fmin, epsilon):
-        """
+def _compute_acq(grid, m, s, fmin, epsilon):
+        
+    """
         Computes the Expected Improvement per unit of cost.
         fmin : is the global minimum.
         grid : The grid that we want to fit the function and do the optimization on.
         epsilon : positive value to make the acquisition more explorative. Check the Simon paper. 
         
         """
-        m, s = fitted_model.predict(grid)
+        m, s = grid_pred[:,0], grid_pred[:,1]
         phi, Phi, u = get_quantiles(epsilon, fmin, m, s)
         f_acqu = s * (u * Phi + phi)
         return f_acqu
