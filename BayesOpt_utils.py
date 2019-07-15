@@ -15,15 +15,8 @@ import pandas as pd
 from sklearn.gaussian_process import GaussianProcessRegressor
 #from sklearn.gaussian_process.kernels import DotProduct, WhiteKernel
 
-def Checking_data_gen(num_cats, ):
     
     
-def Data_generator():
-    """
-    num_cat 
-    
-    """
-    pass
 
 
 def Data_organizer(Data):
@@ -39,7 +32,7 @@ def Data_organizer(Data):
 
 
 
-def GPR_model(kernelf=None, noise_var=1e-10, exact_feval=False, optimizerf='fmin_l_bfgs_b',\
+def GPR_model(kernelf=None, noise_var=1e-10, optimizerf='fmin_l_bfgs_b',\
               optimize_restarts=5, X, Y, cross_validate= False, grid):
     
     """
@@ -108,18 +101,26 @@ def pick_next_sample(min_aqu_vec, nxt_smpl_vec):
     aqu_min_total = min_aqu_vec.min()
     next_sample_total = nxt_smpl_vec[min_pos]
     
-    return next_sample_total, aqu_min_total
+    return next_sample_total, min_pos
 
-def get_fmin(fitted_model, X) :
+def pick_next_sample2(aqu_array):
+    
+    min_pos = aqu_array.argmin()
+    minpoint = min_pos[0]
+    cat_min = min_pos[1]
+    return minpoint, cat_min
+
+def get_fmin(Y) :
    
         """
         Returns the location where the posterior mean is takes its minimal value.
-        """
-    min_pos = min_aqu_vec.argmin()
+        min_pos = min_aqu_vec.argmin()
     aqu_min_total = min_aqu_vec.min()
     next_sample_total = nxt_smpl_vec[min_pos]
     
     return fitted_model.predict(fitted_model.X)[0].min()
+        """
+    return np.amin(Y)
 
 
 
@@ -136,3 +137,18 @@ def _compute_acq_withGradients(self, x):
         return f_acqu, df_acqu
         
 """
+
+def plot_approximation(gpr, X, Y, X_sample, Y_sample, X_next=None, show_legend=False):
+    mu, std = gpr.predict(X, return_std=True)
+    plt.fill_between(X.ravel(), 
+                     mu.ravel() + 1.96 * std, 
+                     mu.ravel() - 1.96 * std, 
+                     alpha=0.1) 
+    plt.plot(X, Y, 'y--', lw=1, label='Noise-free actual objective')
+    plt.plot(X, mu, 'b-', lw=1, label='Surrogate function')
+    #plt.plot(X_sample, Y_sample, 'kx', mew=3, label='Noisy samples')
+    plt.plot(X_sample, Y_sample, 'kx', mew=3, label='Samples')
+    if X_next:
+        plt.axvline(x=X_next, ls='--', c='k', lw=1)
+    if show_legend:
+        plt.legend()
