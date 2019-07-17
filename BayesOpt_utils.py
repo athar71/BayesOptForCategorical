@@ -8,15 +8,19 @@ Created on Mon Jul  8 15:42:47 2019
 Refs : 
 #https://github.com/SheffieldML/GPyOpt/blob/master/GPyOpt/acquisitions/EI.py
 #https://github.com/SheffieldML/GPyOpt/blob/master/GPyOpt/models/gpmodel.py
+#http://krasserm.github.io/2018/03/21/bayesian-optimization/
 """
+
+#For all the functions the default variables should go at the end
 import numpy as np
 import pandas as pd
+from scipy import special
+import matplotlib.pyplot as plt
 
 from sklearn.gaussian_process import GaussianProcessRegressor
 #from sklearn.gaussian_process.kernels import DotProduct, WhiteKernel
 
-    
-    
+        
 
 
 def Data_organizer(Data):
@@ -32,8 +36,8 @@ def Data_organizer(Data):
 
 
 
-def GPR_model(kernelf=None, noise_var=1e-10, optimizerf='fmin_l_bfgs_b',\
-              optimize_restarts=5, X, Y, cross_validate= False, grid):
+def GPR_model(kernelf, X, Y, grid, noise_var=1e-10, optimizerf='fmin_l_bfgs_b',\
+              optimize_restarts=5):
     
     """
     model_type : GPR is the default, rfr (random forest regression or other methods could be added)
@@ -55,14 +59,13 @@ def GPR_model(kernelf=None, noise_var=1e-10, optimizerf='fmin_l_bfgs_b',\
                                    n_restarts_optimizer= optimize_restarts, normalize_y=False).fit(X, Y)
     score = gpr.score(X, Y)
     m,s = gpr.predict(grid, return_std=True, return_cov=False)
-    
-    
-   
-    return score, m, s
+    s = np.array(s)
+    m = np.array(m)  
+    return score, m.reshape(-1,1), s.reshape(-1,1),gpr
 
     
 
-def _compute_acq(grid, m, s, fmin, epsilon):
+def _compute_acq( m, s, fmin, epsilon = 0.01):
         
     """
         Computes the Expected Improvement per unit of cost.
@@ -70,11 +73,10 @@ def _compute_acq(grid, m, s, fmin, epsilon):
         grid : The grid that we want to fit the function and do the optimization on.
         epsilon : positive value to make the acquisition more explorative. Check the Simon paper. 
         
-        """
-        m, s = grid_pred[:,0], grid_pred[:,1]
-        phi, Phi, u = get_quantiles(epsilon, fmin, m, s)
-        f_acqu = s * (u * Phi + phi)
-        return f_acqu
+    """  
+    phi, Phi, u = get_quantiles(epsilon, fmin, m, s)
+    f_acqu = s * (u * Phi + phi)
+    return f_acqu
 
 
 def get_quantiles(acquisition_par, fmin, m, s):
@@ -89,26 +91,26 @@ def get_quantiles(acquisition_par, fmin, m, s):
         s[s<1e-10] = 1e-10
     elif s< 1e-10:
         s = 1e-10
-    u = (fmin - m - acquisition_par)/s
+    u = np.array((fmin - m - acquisition_par))/s
     phi = np.exp(-0.5 * u**2) / np.sqrt(2*np.pi)
-    Phi = 0.5 * erfc(-u / np.sqrt(2))
+    Phi = 0.5 * special.erfc(-u / np.sqrt(2))
     return (phi, Phi, u)
 
 
-def pick_next_sample(min_aqu_vec, nxt_smpl_vec):
+def pick_next_sample(max_aqu_vec, nxt_smpl_vec):
     
-    min_pos = min_aqu_vec.argmin()
-    aqu_min_total = min_aqu_vec.min()
-    next_sample_total = nxt_smpl_vec[min_pos]
+    max_pos = max_aqu_vec.argmax()
+    aqu_max_total = max_aqu_vec.max()
+    next_sample_total = nxt_smpl_vec[max_pos]
     
-    return next_sample_total, min_pos
+    return next_sample_total, max_pos+1
 
 def pick_next_sample2(aqu_array):
     
     min_pos = aqu_array.argmin()
     minpoint = min_pos[0]
     cat_min = min_pos[1]
-    return minpoint, cat_min
+    return minpoint, cat_min+1
 
 def get_fmin(Y) :
    
@@ -120,7 +122,7 @@ def get_fmin(Y) :
     
     return fitted_model.predict(fitted_model.X)[0].min()
         """
-    return np.amin(Y)
+        return np.amin(Y)
 
 
 
@@ -138,13 +140,13 @@ def _compute_acq_withGradients(self, x):
         
 """
 
-def plot_approximation(gpr, X, Y, X_sample, Y_sample, X_next=None, show_legend=False):
+def plot_approximation(gpr, X, Y, X_sample, Y_sample, num_cat, X_next=None, show_legend=False):
     mu, std = gpr.predict(X, return_std=True)
     plt.fill_between(X.ravel(), 
                      mu.ravel() + 1.96 * std, 
                      mu.ravel() - 1.96 * std, 
                      alpha=0.1) 
-    plt.plot(X, Y, 'y--', lw=1, label='Noise-free actual objective')
+    plt.plot(X, Y, 'y--', lw=1, label='Noise-free actual objective'+" "+str( num_cat))
     plt.plot(X, mu, 'b-', lw=1, label='Surrogate function')
     #plt.plot(X_sample, Y_sample, 'kx', mew=3, label='Noisy samples')
     plt.plot(X_sample, Y_sample, 'kx', mew=3, label='Samples')
@@ -152,3 +154,9 @@ def plot_approximation(gpr, X, Y, X_sample, Y_sample, X_next=None, show_legend=F
         plt.axvline(x=X_next, ls='--', c='k', lw=1)
     if show_legend:
         plt.legend()
+        
+def plot_acquisition(X, Y, X_next, show_legend=False):
+    plt.plot(X, Y, 'r-', lw=1, label='Acquisition function')
+    plt.axvline(x=X_next, ls='--', c='k', lw=1, label='Next sampling location')
+    if show_legend:
+        plt.legend()            
