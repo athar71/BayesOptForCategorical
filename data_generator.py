@@ -7,12 +7,11 @@ Created on Sat Jul 13 16:42:28 2019
 """
 
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 
 
 
-from sklearn.gaussian_process import GaussianProcessRegressor
+
+
 #from sklearn.gaussian_process.kernels import DotProduct, WhiteKernel
 
 def Checking_data_gen( X1,X2,X3 , noise=0.02):
@@ -23,15 +22,15 @@ def Checking_data_gen( X1,X2,X3 , noise=0.02):
     noise = 0.2
     num_cats = 3
     """
-    f1 = -np.sin(3*X1) - X1**2 + 0.7*X1 + noise * np.random.randn(*X1.shape)
-    f2 = -np.sin(5*X2) - X2**2 + X2 + noise * np.random.randn(*X.shape) 
-    f3 = -np.sin(3*X3) - X3**2 + 2*X3 + noise * np.random.randn(*X.shape)
+    f1 = -np.sin(3*X1) - X1**2 + X1 + noise * np.random.randn(*X1.shape)
+    f2 = -np.sin(5*X2) - X2**2 + X2 + noise * np.random.randn(*X2.shape) 
+    f3 = -np.sin(3*X3) - X3**2 + 3*X3 + noise * np.random.randn(*X2.shape)
     
     return f1,f2,f3
 
 def f1(X1,  noise=0.02):
     
-    return -np.sin(3*X1) - X1**2 + 0.7*X1 + noise * np.random.randn(*X1.shape)
+    return -np.sin(3*X1) - X1**2 + X1 + noise * np.random.randn(*X1.shape)
 
 def f2(X2,  noise=0.02):
     

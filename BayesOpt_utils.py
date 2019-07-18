@@ -140,23 +140,42 @@ def _compute_acq_withGradients(self, x):
         
 """
 
-def plot_approximation(gpr, X, Y, X_sample, Y_sample, num_cat, X_next=None, show_legend=False):
+def plot_approximation(gpr, X, Y, X_sample, Y_sample, num_cat,color, X_next=None, show_legend=False):
     mu, std = gpr.predict(X, return_std=True)
     plt.fill_between(X.ravel(), 
                      mu.ravel() + 1.96 * std, 
                      mu.ravel() - 1.96 * std, 
                      alpha=0.1) 
+    
+    plt.plot(X, Y, color, lw=1, label='Noise-free actual objective'+" "+str( num_cat))
+    plt.plot(X, mu, 'b-', lw=1)
+    #plt.plot(X_sample, Y_sample, 'kx', mew=3, label='Noisy samples')
+    plt.plot(X_sample, Y_sample, 'kx', mew=3)
+    """
     plt.plot(X, Y, 'y--', lw=1, label='Noise-free actual objective'+" "+str( num_cat))
     plt.plot(X, mu, 'b-', lw=1, label='Surrogate function')
     #plt.plot(X_sample, Y_sample, 'kx', mew=3, label='Noisy samples')
     plt.plot(X_sample, Y_sample, 'kx', mew=3, label='Samples')
+    """
     if X_next:
         plt.axvline(x=X_next, ls='--', c='k', lw=1)
     if show_legend:
-        plt.legend()
+        plt.legend(prop={'size':6})
         
 def plot_acquisition(X, Y, X_next, show_legend=False):
     plt.plot(X, Y, 'r-', lw=1, label='Acquisition function')
     plt.axvline(x=X_next, ls='--', c='k', lw=1, label='Next sampling location')
     if show_legend:
         plt.legend()            
+        
+def plot_all(gpr, X, Y,color, X_sample, Y_sample, num_cat,X2, Y2,color2, X3, Y3,color3,  X_next=None, show_legend=False):
+         
+    plt.plot(X, Y, color, X2,Y2, color2, X3, Y3, color3, lw=1, label='Noise-free actual objective'+" "+str( num_cat))
+    plt.plot(X_sample, Y_sample, 'kx', mew=3)
+    
+def plot_acquisition_all(X, Y,color, X_next,X2, Y2, color2,X3, Y3,color3,   show_legend=False):
+    plt.plot(X, Y, color,X2,Y2, color2, X3, Y3, color3)
+    plt.axvline(x=X_next, ls='--', c='k', lw=1, label='Next sampling location')
+    
+    if show_legend:
+        plt.legend()                
