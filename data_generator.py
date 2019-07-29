@@ -22,9 +22,9 @@ def Checking_data_gen( X1,X2,X3 , noise=0.02):
     noise = 0.2
     num_cats = 3
     """
-    f1 = -np.sin(3*X1) - X1**2 + X1 + noise * np.random.randn(*X1.shape)
-    f2 = -np.sin(5*X2) - X2**2 + X2 + noise * np.random.randn(*X2.shape) 
-    f3 = -np.sin(3*X3) - X3**2 + 3*X3 + noise * np.random.randn(*X2.shape)
+    f1 = -1*(-np.sin(3*X1) - X1**2 + X1 + noise * np.random.randn(*X1.shape))
+    f2 = -1*(-np.sin(5*X2) - X2**2 + X2 + noise * np.random.randn(*X2.shape) )
+    f3 = -1*(-np.sin(3*X3) - X3**2 + 3*X3 + noise * np.random.randn(*X2.shape))
     
     return f1,f2,f3
 
