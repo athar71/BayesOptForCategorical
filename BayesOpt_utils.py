@@ -88,9 +88,9 @@ def get_quantiles(acquisition_par, fmin, m, s):
     :param s: vector of standard deviations.
     '''
     if isinstance(s, np.ndarray):
-        s[s<1e-10] = 1e-10
-    elif s< 1e-10:
-        s = 1e-10
+        s[s<1e-10] = 1e-5
+    elif s< 1e-5:
+        s = 1e-5
     u = np.array((fmin - m - acquisition_par))/s
     phi = np.exp(-0.5 * u**2) / np.sqrt(2*np.pi)
     Phi = 0.5 * special.erfc(-u / np.sqrt(2))
