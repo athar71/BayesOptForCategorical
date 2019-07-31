@@ -36,10 +36,10 @@ kernel = ConstantKernel(1.0) * Matern(length_scale=1.0, nu=2.5)
 # Initialize samples 
 
 noise = 0
-bounds = np.array([[-1.0, 2.0]])
+bounds = np.array([[-0.5, 2]])
 epsilon = 0 #exploration coefficient
 
-X_init = np.array([[-0.8], [1.3]])
+X_init = np.array([[-0.4], [0.8], [2]])
 Y1_init = dgen.f1(X_init)
 Y2_init = dgen.f2(X_init)
 Y3_init = dgen.f3(X_init)
@@ -58,11 +58,12 @@ grid3 = np.arange(bounds[:, 0], bounds[:, 1], 0.01).reshape(-1, 1)
 Y1 = dgen.f1(grid1)
 Y2 = dgen.f2(grid2)
 Y3 = dgen.f3(grid3)
-
+plt.figure(num =3)
+BO.plot_functions(grid1,Y1, grid2,Y2, grid3,Y3, color1, color2, color3)   
 
 # Number of iterations
 
-n_iter = 4
+n_iter = 8
 plt.figure(num =1, figsize=(12, n_iter * 3))
 plt.subplots_adjust(hspace=0.5)
 #plt.subplots_adjust(left=0.9, bottom=0.9, right=0.9, top=0.9, wspace=0.5, hspace=0.5)
@@ -73,7 +74,8 @@ plt.subplots_adjust(hspace=0.5)
 color1 = 'r-'
 color2 = 'g-'
 color3 = 'm-'
- 
+
+  
 
 for i in range(n_iter):
     # Update Gaussian process with existing samples
@@ -111,7 +113,7 @@ for i in range(n_iter):
          
          plt.figure(1)
          plt.subplot(n_iter, 2, 2 * i + 1)
-         BO.plot_approximation(gpr1, grid1, Y1, X1_sample, Y1_sample,cat_max,color1, X_next, show_legend= i%1==0)
+         BO.plot_approximation(gpr1, grid1, Y1, X1_sample, Y1_sample,cat_max,color1, X_next, show_legend= i==0)
          #plt.title(f 'Iteration {i+1}', fontsize=6)
          plt.title('Iteration %d' %(i + 1), fontsize=6)
          plt.subplot(n_iter, 2, 2 * i + 2)
@@ -121,7 +123,7 @@ for i in range(n_iter):
          
          plt.figure(2)
          plt.subplot(n_iter, 2, 2 * i + 1)
-         BO.plot_all(gpr1, grid1, Y1, color1, X1_sample, Y1_sample,cat_max, grid2, Y2, color2, grid3, Y3, color3, X_next, show_legend= i%1==0)
+         BO.plot_all(gpr1, grid1, Y1, color1, X1_sample, Y1_sample,cat_max, grid2, Y2, color2, grid3, Y3, color3, X_next, show_legend= i==0)
          #plt.title(f'Iteration {i+1}', fontsize=6)
          plt.title('Iteration %d' % (i + 1), fontsize=6)
          plt.subplot(n_iter, 2, 2 * i + 2)
@@ -139,7 +141,7 @@ for i in range(n_iter):
          
          plt.figure(1)
          plt.subplot(n_iter, 2, 2 * i + 1)
-         BO.plot_approximation(gpr2, grid2, Y2, X2_sample, Y2_sample, cat_max, color2, X_next, show_legend=i%1==0)
+         BO.plot_approximation(gpr2, grid2, Y2, X2_sample, Y2_sample, cat_max, color2, X_next, show_legend=i==0)
          #plt.title(f'Iteration {i+1}', fontsize=6)
          plt.title('Iteration %d' %(i + 1), fontsize=6)
          plt.subplot(n_iter, 2, 2 * i + 2)
@@ -149,7 +151,7 @@ for i in range(n_iter):
          
          plt.figure(2)
          plt.subplot(n_iter, 2, 2 * i + 1)
-         BO.plot_all(gpr2, grid2, Y2, color2, X2_sample, Y2_sample,cat_max, grid1, Y1, color1, grid3, Y3, color3, X_next, show_legend= i%1==0)
+         BO.plot_all(gpr2, grid2, Y2, color2, X2_sample, Y2_sample,cat_max, grid1, Y1, color1, grid3, Y3, color3, X_next, show_legend= i==0)
          #plt.title(f'Iteration {i+1}', fontsize=6)
          plt.title('Iteration %d' %(i + 1), fontsize=6)
          plt.subplot(n_iter, 2, 2 * i + 2)
@@ -166,7 +168,7 @@ for i in range(n_iter):
          
          plt.figure(1)
          plt.subplot(n_iter, 2, 2 * i + 1)
-         BO.plot_approximation(gpr3, grid3, Y3, X3_sample, Y3_sample, cat_max, color3, X_next, show_legend=i%1==0)
+         BO.plot_approximation(gpr3, grid3, Y3, X3_sample, Y3_sample, cat_max, color3, X_next, show_legend=i==0)
          #plt.title(f'Iteration {i+1}', fontsize=6)
          plt.title('Iteration %d' %(i + 1), fontsize=6)
          plt.subplot(n_iter, 2, 2 * i + 2)
@@ -174,7 +176,7 @@ for i in range(n_iter):
          
          plt.figure(2)
          plt.subplot(n_iter, 2, 2 * i + 1)
-         BO.plot_all(gpr3, grid3, Y3, color3, X3_sample, Y3_sample,cat_max, grid1, Y1, color1, grid2, Y2, color2, X_next, show_legend= i%1==0)
+         BO.plot_all(gpr3, grid3, Y3, color3, X3_sample, Y3_sample,cat_max, grid1, Y1, color1, grid2, Y2, color2, X_next, show_legend= i==0)
          #plt.title(f'Iteration {i+1}', fontsize=6)
          plt.title('Iteration %d' %(i + 1), fontsize=6)
 

@@ -88,7 +88,7 @@ def get_quantiles(acquisition_par, fmin, m, s):
     :param s: vector of standard deviations.
     '''
     if isinstance(s, np.ndarray):
-        s[s<1e-10] = 1e-5
+        s[s<1e-5] = 1e-5
     elif s< 1e-5:
         s = 1e-5
     u = np.array((fmin - m - acquisition_par))/s
@@ -173,9 +173,19 @@ def plot_all(gpr, X, Y,color, X_sample, Y_sample, num_cat,X2, Y2,color2, X3, Y3,
     plt.plot(X, Y, color, X2,Y2, color2, X3, Y3, color3, lw=1, label='Noise-free actual objective'+" "+str( num_cat))
     plt.plot(X_sample, Y_sample, 'kx', mew=3)
     
+    if X_next:
+        plt.axvline(x=X_next, ls='--', c='k', lw=1)
+    if show_legend:
+        plt.legend(prop={'size':6})
+        
 def plot_acquisition_all(X, Y,color, X_next,X2, Y2, color2,X3, Y3,color3,   show_legend=False):
     plt.plot(X, Y, color,X2,Y2, color2, X3, Y3, color3)
     plt.axvline(x=X_next, ls='--', c='k', lw=1, label='Next sampling location')
     
     if show_legend:
-        plt.legend()                
+        plt.legend()   
+
+def plot_functions(X1,Y1, X2,Y2, X3,Y3, color1, color2, color3)             :
+    plt.plot(X1, Y1, color1,X2,Y2, color2, X3, Y3, color3)
+    plt.legend( ['f1', 'f2', 'f3'])
+    
